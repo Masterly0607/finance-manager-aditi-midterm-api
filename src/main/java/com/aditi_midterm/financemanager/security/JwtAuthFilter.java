@@ -15,7 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-// Checks token on every request = Runs on every request, Checks the JWT token, If valid → lets request continue, If invalid → blocks or treats user as not logged in.
+
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -41,7 +41,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = auth.substring(7);
 
         try {
-            Claims claims = jwtService.parseClaims(token);
+            // IMPORTANT: parse as ACCESS token only
+            Claims claims = jwtService.parseAccessClaims(token);
+
+            // Reject if someone tries to use a refresh token here
+            String type = claims.get("type", String.class);
+            if (!"access".equals(type)) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             Long userId = Long.valueOf(claims.getSubject());
             String email = claims.get("email", String.class);
             String roleStr = claims.get("role", String.class);
@@ -57,7 +67,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception ex) {
-            // token invalid → clear context (treat as not logged in)
             SecurityContextHolder.clearContext();
         }
 

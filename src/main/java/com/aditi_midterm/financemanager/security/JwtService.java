@@ -12,41 +12,68 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
-// Create and validate token
-// How Create token works? => 1. Takes user info, 2. Creates a JWT, 3. Signs it with a secret key, 4. Returns it as a String
-// How Validate token works(validate after login)? =>
-
 @Service
 public class JwtService {
 
-    private final SecretKey key;
-    private final long expirationMinutes;
+    private final SecretKey accessKey;
+    private final SecretKey refreshKey;
+
+    private final long accessExpirationMinutes;
+    private final long refreshExpirationDays;
 
     public JwtService(
-            @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.expiration-minutes}") long expirationMinutes
+            @Value("${app.jwt.access-secret}") String accessSecret,
+            @Value("${app.jwt.refresh-secret}") String refreshSecret,
+            @Value("${app.jwt.access-expiration-minutes}") long accessExpirationMinutes,
+            @Value("${app.jwt.refresh-expiration-days}") long refreshExpirationDays
     ) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMinutes = expirationMinutes;
+        this.accessKey = Keys.hmacShaKeyFor(accessSecret.getBytes(StandardCharsets.UTF_8));
+        this.refreshKey = Keys.hmacShaKeyFor(refreshSecret.getBytes(StandardCharsets.UTF_8));
+        this.accessExpirationMinutes = accessExpirationMinutes;
+        this.refreshExpirationDays = refreshExpirationDays;
     }
 
-    public String generateToken(Long userId, String email, Role role) {
+    public String generateAccessToken(Long userId, String email, Role role) {
         Instant now = Instant.now();
-        Instant exp = now.plusSeconds(expirationMinutes * 60);
+        Instant exp = now.plusSeconds(accessExpirationMinutes * 60);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("type", "access")
                 .claim("email", email)
                 .claim("role", role.name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(exp))
-                .signWith(key)
+                .signWith(accessKey)
                 .compact();
     }
 
-    public Claims parseClaims(String token) {
+    public String generateRefreshToken(Long userId) {
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(refreshExpirationDays * 24 * 60 * 60);
+
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("type", "refresh")
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(exp))
+                .signWith(refreshKey)
+                .compact();
+    }
+
+    /** Parse ACCESS token claims */
+    public Claims parseAccessClaims(String token) {
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(accessKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    /** Parse REFRESH token claims */
+    public Claims parseRefreshClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(refreshKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
