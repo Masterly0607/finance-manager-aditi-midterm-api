@@ -1,5 +1,6 @@
 package com.aditi_midterm.financemanager.seed;
 
+import com.aditi_midterm.financemanager.security.PasswordConfig;
 import com.aditi_midterm.financemanager.user.Role;
 import com.aditi_midterm.financemanager.user.User;
 import com.aditi_midterm.financemanager.user.UserRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class UserDataLoading implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final PasswordConfig passwordConfig;
 
     @Override
     public void run(String... args) throws Exception {
@@ -25,7 +27,7 @@ public class UserDataLoading implements CommandLineRunner {
         User user = User
                 .builder()
                 .email("johndoe@gmail.com")
-                .passwordHash("password")
+                .passwordHash(passwordConfig.passwordEncoder().encode("password"))
                 .role(Role.valueOf("ADMIN"))
                 .isActive(true)
                 .build();
