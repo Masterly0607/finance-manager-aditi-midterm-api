@@ -3,6 +3,7 @@ package com.aditi_midterm.financemanager.account.mapper;
 import com.aditi_midterm.financemanager.account.Account;
 import com.aditi_midterm.financemanager.account.dto.AccountResponse;
 import com.aditi_midterm.financemanager.account.dto.CreateAccountRequest;
+import com.aditi_midterm.financemanager.account.dto.UpdateAccountRequest;
 import com.aditi_midterm.financemanager.user.User;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,7 @@ public class AccountMapper {
         return acc;
     }
 
-
-    public static AccountResponse toResponse(Account a) {
+    public AccountResponse toResponse(Account a) {
         return new AccountResponse(
                 a.getId(),
                 a.getName(),
@@ -29,4 +29,8 @@ public class AccountMapper {
         );
     }
 
+    public void updateEntityFromRequest(Account account, UpdateAccountRequest request) {
+        account.setName(request.getName());
+        account.setBalance(request.getBalance());
+    }
 }
