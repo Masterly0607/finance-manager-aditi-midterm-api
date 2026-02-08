@@ -1,6 +1,8 @@
 package com.aditi_midterm.financemanager.auth;
 
-import com.aditi_midterm.financemanager.auth.dto.*;
+import com.aditi_midterm.financemanager.auth.dto.AuthResponse;
+import com.aditi_midterm.financemanager.auth.dto.LoginRequest;
+import com.aditi_midterm.financemanager.auth.dto.RegisterRequest;
 import com.aditi_midterm.financemanager.security.JwtService;
 import com.aditi_midterm.financemanager.user.Role;
 import com.aditi_midterm.financemanager.user.User;
@@ -9,6 +11,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,27 +25,34 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     private final boolean cookieSecure;
     private final String cookieSameSite;
     private final int refreshCookieMaxAgeSeconds;
 
-    public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService,
-                       @Value("${app.jwt.cookie.secure:false}") boolean cookieSecure,
-                       @Value("${app.jwt.cookie.samesite:Strict}") String cookieSameSite,
-                       @Value("${app.jwt.refresh-expiration-days:7}") long refreshExpirationDays) {
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            AuthenticationManager authenticationManager,
+            @Value("${app.jwt.cookie.secure:false}") boolean cookieSecure,
+            @Value("${app.jwt.cookie.samesite:Strict}") String cookieSameSite,
+            @Value("${app.jwt.refresh-expiration-days:7}") long refreshExpirationDays
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
 
         this.cookieSecure = cookieSecure;
         this.cookieSameSite = cookieSameSite;
         this.refreshCookieMaxAgeSeconds = Math.toIntExact(refreshExpirationDays * 24 * 60 * 60);
     }
 
-//    Register
+    // ------------------------
+    // Register
+    // ------------------------
     public void register(RegisterRequest request) {
         String email = request.email().trim().toLowerCase();
 
@@ -62,32 +74,43 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    // Sets refresh cookie and returns access token.
-    // Logs user in and issues tokens: Access token returned in response body and Refresh token stored in HttpOnly cookie
+    // ------------------------
+    // Login (Spring Security checks password via UserDetailsService)
+    // ------------------------
     public AuthResponse login(LoginRequest req, HttpServletResponse response) {
         String email = req.email().trim().toLowerCase();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+        try {
+            // ✅ This triggers:
+            // CustomUserDetailsService.loadUserByUsername(email)
+            // then PasswordEncoder checks the password automatically
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, req.password())
+            );
 
-        if (!Boolean.TRUE.equals(user.getIsActive())) {
-            throw new IllegalArgumentException("User is disabled");
-        }
+            // If authentication is successful, user exists & password is correct
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        boolean matches = passwordEncoder.matches(req.password(), user.getPasswordHash());
-        if (!matches) {
+            if (!Boolean.TRUE.equals(user.getIsActive())) {
+                throw new IllegalArgumentException("User is disabled");
+            }
+
+            String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+            String refreshToken = jwtService.generateRefreshToken(user.getId());
+
+            setRefreshCookie(response, refreshToken);
+            return new AuthResponse(accessToken);
+
+        } catch (Exception ex) {
+            // Don’t reveal exact reason (security best practice)
             throw new IllegalArgumentException("Invalid email or password");
         }
-
-        String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
-        String refreshToken = jwtService.generateRefreshToken(user.getId());
-
-        setRefreshCookie(response, refreshToken);
-
-        return new AuthResponse(accessToken);
     }
 
-    // Refresh endpoint logic(Gives a new access token using the refresh cookie when access expires.)
+    // ------------------------
+    // Refresh (new access token using refresh cookie)
+    // ------------------------
     public AuthResponse refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = readCookie(request, REFRESH_COOKIE_NAME);
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -110,17 +133,18 @@ public class AuthService {
             throw new IllegalArgumentException("User is disabled");
         }
 
-        // Issue NEW access token
         String newAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
 
-        // (Optional) rotate refresh token:
+        // Optional: rotate refresh token (more secure)
         // String newRefreshToken = jwtService.generateRefreshToken(user.getId());
         // setRefreshCookie(response, newRefreshToken);
 
         return new AuthResponse(newAccessToken);
     }
 
-    // logout clears refresh cookie(Logs user out by removing refresh cookie.)
+    // ------------------------
+    // Logout (clear refresh cookie)
+    // ------------------------
     public void logout(HttpServletResponse response) {
         clearRefreshCookie(response);
     }
@@ -128,9 +152,7 @@ public class AuthService {
     // ------------------------
     // Cookie helpers
     // ------------------------
-
     private void setRefreshCookie(HttpServletResponse response, String refreshToken) {
-        // We use Set-Cookie header for SameSite control
         String cookie = REFRESH_COOKIE_NAME + "=" + refreshToken
                 + "; Max-Age=" + refreshCookieMaxAgeSeconds
                 + "; Path=/api/auth/refresh"
