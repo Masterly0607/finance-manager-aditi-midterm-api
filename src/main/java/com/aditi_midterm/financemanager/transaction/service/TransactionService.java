@@ -9,9 +9,13 @@ import java.util.List;
 
 public interface TransactionService {
 
-    List<TransactionResponse> getAllTransactions(Pagination pagination);
-    TransactionResponse getTransactionById(Long id);
-    TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest);
-    TransactionResponse updateTransaction(Long id, UpdateTransactionRequest updateTransactionRequest);
-    void deleteTransaction(Long id);
+  List<TransactionResponse> getAllTransactions(Pagination pagination);
+
+  TransactionResponse getTransactionById(Long id);
+
+  TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest);
+
+  TransactionResponse updateTransaction(Long id, UpdateTransactionRequest updateTransactionRequest);
+
+  void deleteTransaction(Long id);
 }

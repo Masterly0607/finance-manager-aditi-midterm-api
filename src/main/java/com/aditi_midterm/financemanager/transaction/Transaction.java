@@ -18,32 +18,32 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Transaction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, length = 20)
-    @Enumerated(EnumType.STRING)
-    private TransactionType type;
+  @Column(nullable = false, length = 20)
+  @Enumerated(EnumType.STRING)
+  private TransactionType type;
 
-    @NotNull
-    @DecimalMin(value = "0.01")
-    @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal amount;
+  @NotNull
+  @DecimalMin(value = "0.01")
+  @Column(nullable = false, precision = 19, scale = 2)
+  private BigDecimal amount;
 
-    @Column(length = 500)
-    private String note;
+  @Column(length = 500)
+  private String note;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+  @NotNull
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "account_id", nullable = false)
+  private Account account;
 
-    @Column(name = "created_at" , nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
 }

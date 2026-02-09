@@ -19,48 +19,47 @@ import java.util.Optional;
 @Order(3)
 public class TransactionDataLoading implements CommandLineRunner {
 
-    private final TransactionRepository transactionRepository;
-    private final AccountRepository accountRepository;
+  private final TransactionRepository transactionRepository;
+  private final AccountRepository accountRepository;
 
-    @Override
-    public void run(String... args) throws Exception {
+  @Override
+  public void run(String... args) throws Exception {
 
-        if (transactionRepository.count() > 0) return;
+    if (transactionRepository.count() > 0) return;
 
-        Account cash = accountRepository.findByName("Cash Wallet")
-                .orElse(null);
+    Account cash = accountRepository.findByName("Cash Wallet").orElse(null);
 
-        Account bank = accountRepository.findByName("ABA Bank")
-                .orElse(null);
+    Account bank = accountRepository.findByName("ABA Bank").orElse(null);
 
-        if (cash == null || bank == null) {
-            System.out.println("Accounts not found. Skipping transaction seeding.");
-            return;
-        }
-
-        Transaction t1 = Transaction.builder()
-                .type(TransactionType.INCOME)
-                .amount(new BigDecimal("500.00"))
-                .note("Salary")
-                .account(bank)
-                .build();
-
-        Transaction t2 = Transaction.builder()
-                .type(TransactionType.EXPENSE)
-                .amount(new BigDecimal("120.50"))
-                .note("Groceries")
-                .account(cash)
-                .build();
-
-        Transaction t3 = Transaction.builder()
-                .type(TransactionType.EXPENSE)
-                .amount(new BigDecimal("45.00"))
-                .note("Coffee")
-                .account(cash)
-                .build();
-
-        transactionRepository.saveAll(List.of(
-           t1, t2, t3
-        ));
+    if (cash == null || bank == null) {
+      System.out.println("Accounts not found. Skipping transaction seeding.");
+      return;
     }
+
+    Transaction t1 =
+        Transaction.builder()
+            .type(TransactionType.INCOME)
+            .amount(new BigDecimal("500.00"))
+            .note("Salary")
+            .account(bank)
+            .build();
+
+    Transaction t2 =
+        Transaction.builder()
+            .type(TransactionType.EXPENSE)
+            .amount(new BigDecimal("120.50"))
+            .note("Groceries")
+            .account(cash)
+            .build();
+
+    Transaction t3 =
+        Transaction.builder()
+            .type(TransactionType.EXPENSE)
+            .amount(new BigDecimal("45.00"))
+            .note("Coffee")
+            .account(cash)
+            .build();
+
+    transactionRepository.saveAll(List.of(t1, t2, t3));
+  }
 }

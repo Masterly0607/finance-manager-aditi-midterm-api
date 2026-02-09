@@ -14,23 +14,23 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserDataLoading implements CommandLineRunner {
 
-    private final UserRepository userRepository;
-    private final PasswordConfig passwordConfig;
+  private final UserRepository userRepository;
+  private final PasswordConfig passwordConfig;
 
-    @Override
-    public void run(String... args) throws Exception {
+  @Override
+  public void run(String... args) throws Exception {
 
-        if(userRepository.existsByEmail("johndoe@gmail.com")) {
-            return;
-        }
-
-        User user = User
-                .builder()
-                .email("johndoe@gmail.com")
-                .passwordHash(passwordConfig.passwordEncoder().encode("password"))
-                .role(Role.valueOf("ADMIN"))
-                .isActive(true)
-                .build();
-        userRepository.save(user);
+    if (userRepository.existsByEmail("johndoe@gmail.com")) {
+      return;
     }
+
+    User user =
+        User.builder()
+            .email("johndoe@gmail.com")
+            .passwordHash(passwordConfig.passwordEncoder().encode("password"))
+            .role(Role.valueOf("ADMIN"))
+            .isActive(true)
+            .build();
+    userRepository.save(user);
+  }
 }
