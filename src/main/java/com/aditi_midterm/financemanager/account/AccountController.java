@@ -30,7 +30,7 @@ public class AccountController {
     ) {
 
         AccountResponse response =
-                accountService.createAccount(request, me.userId());
+                accountService.createAccount(request, me.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -42,7 +42,7 @@ public class AccountController {
     ) {
 
         List<AccountResponse> accounts =
-                accountService.listByUser(me.userId());
+                accountService.listByUser(me.getId());
 
         return ResponseEntity.ok(accounts);
     }
@@ -55,7 +55,7 @@ public class AccountController {
     ) {
 
         AccountResponse account =
-                accountService.getAccountById(accountId, me.userId());
+                accountService.getAccountById(accountId, me.getId());
 
         return ResponseEntity.ok(account);
     }
@@ -69,7 +69,7 @@ public class AccountController {
     ) {
 
         AccountResponse response =
-                accountService.updateAccount(accountId, me.userId(), request);
+                accountService.updateAccount(accountId, me.getId(), request);
 
         return ResponseEntity.ok(response);
     }
@@ -81,7 +81,7 @@ public class AccountController {
             @AuthenticationPrincipal UserPrincipal me
     ) {
 
-        accountService.deleteAccount(accountId, me.userId());
+        accountService.deleteAccount(accountId, me.getId());
 
         return ResponseEntity.noContent().build();
     }

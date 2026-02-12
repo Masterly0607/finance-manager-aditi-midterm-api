@@ -63,6 +63,6 @@ public class AuthController {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal p)) {
             throw new IllegalArgumentException("Not authenticated");
         }
-        return new MeResponse(p.userId(), p.email(), p.role());
+        return new MeResponse(p.getId(), p.email(), p.role());
     }
 }

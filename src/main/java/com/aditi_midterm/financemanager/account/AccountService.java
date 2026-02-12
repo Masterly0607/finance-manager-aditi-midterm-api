@@ -36,7 +36,7 @@ public class AccountService {
     }
 
     public List<AccountResponse> listByUser(Long userId) {
-        return accountRepository.findByUserId(userId)
+        return accountRepository.findAllByUserId(userId)
                 .stream()
                 .map(accountMapper::toResponse)
                 .collect(Collectors.toList());
