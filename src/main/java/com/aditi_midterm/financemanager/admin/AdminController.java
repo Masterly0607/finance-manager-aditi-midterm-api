@@ -44,12 +44,12 @@ public class AdminController {
         return ResponseEntity.ok(responses);
     }
 
-    @PatchMapping("/user/{id}")
-    public String getID(@PathVariable Long id){
-        return "the id that would return is : "+ id;
-    }
+//    @PatchMapping("/user/{id}")
+//    public String getID(@PathVariable Long id){
+//        return "the id that would return is : "+ id;
+//    }
 
-    @PatchMapping("/user/{id}/role")
+    @PatchMapping("/users/{id}/role")
     public ResponseEntity<ApiResponse<AdminResponse>> toggleUserRole(
         @PathVariable Long id
     ){

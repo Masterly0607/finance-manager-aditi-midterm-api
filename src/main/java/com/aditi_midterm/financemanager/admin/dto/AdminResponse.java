@@ -5,11 +5,11 @@ import java.time.Instant;
 import com.aditi_midterm.financemanager.user.Role;
 
 public record AdminResponse(
-    int id,
-    String email,
-    Role role,
-    boolean isActive,
-    Instant createdAt
+        Long id,
+        String email,
+        Role role,
+        boolean isActive,
+        Instant createdAt
 ) {
 
 }
