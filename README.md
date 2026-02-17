@@ -1,282 +1,226 @@
-# 💰 Personal Finance Manager – Backend (Spring Boot)
+# 💰 Personal Finance Manager -- Backend API
 
 ---
 
-## 📌 Overview
+## 📌 Project Overview
 
-This is the **Backend API** for the Personal Finance Manager Web Application.
+The **Personal Finance Manager Backend API** is a secure RESTful API
+built using Spring Boot.\
+It manages authentication, accounts, transactions, internal transfers,
+and financial dashboard summaries.
 
-It is built using:
+This project is developed for academic mid-term purposes and focuses on:
+
+- Secure backend architecture
+- Financial business logic
+- JWT-based authentication
+- Role-based access control (RBAC)
+- Clean layered architecture
+
+⚠️ This system does NOT handle real money or real banking integrations.
+
+---
+
+# 🎯 Project Objectives
+
+- Build a secure REST API using Spring Boot
+- Implement JWT authentication (Access + Refresh Tokens)
+- Manage accounts and balances
+- Handle income, expense, and transfer operations
+- Provide financial summary dashboard
+- Apply role-based authorization (USER / ADMIN)
+
+---
+
+# 🛠️ Technology Stack
+
+## Backend
 
 - Spring Boot
 - Spring Security
-- JWT Authentication (Access + Refresh Tokens)
-- PostgreSQL
 - Spring Data JPA
-- Swagger / OpenAPI
+- Lombok
 
-This backend provides secure REST APIs for:
+## Authentication & Security
 
-- User Authentication
-- Account Management
-- Income & Expense Tracking
-- Internal Transfers
-- Dashboard Financial Summary
-- Admin Monitoring
+- JWT Access Token
+- Refresh Token (HttpOnly Cookie)
+- BCrypt password hashing
+- Role-based authorization
 
-This project was developed for **mid-term academic purposes**.
+## Database
 
----
+- PostgreSQL
+- JPA / Hibernate ORM
 
-# 🎯 Core Features
+## Deployment
 
-## 🔐 Authentication
-- User Registration
-- User Login
-- JWT Access Token generation
-- Refresh Token via HttpOnly Cookie
-- Logout
-- `/api/auth/me` endpoint for current user
-
-## 👤 Role-Based Access Control
-- USER role
-- ADMIN role
-- Admin can:
-  - View all users
-  - Toggle user roles
-  - View all transactions
-
-## 💼 Account Management
-- Create Account
-- Update Account
-- List User Accounts
-- Account balance tracking
-
-## 💰 Transactions
-- Record Income
-- Record Expense
-- List Transactions
-- Automatic balance update
-
-## 🔁 Transfers
-- Transfer between user accounts
-- Balance deduction and addition
-- Transfer history tracking
-
-## 📊 Dashboard
-- Total Balance
-- Monthly Income
-- Monthly Expense
-- Net Calculation
+- Backend: Render
 
 ---
 
-# 🏗 Backend Folder Structure
+# 📂 Backend Project Structure
 
-```
+```bash
 financemanager-backend/
 ├── auth/
-│   ├── dto/
-│   │   ├── RegisterRequest.java
-│   │   ├── LoginRequest.java
-│   │   ├── AuthResponse.java
-│   │   └── MeResponse.java
-│   ├── AuthController.java
-│   └── AuthService.java
-│
 ├── security/
-│   ├── JwtService.java
-│   ├── JwtAuthFilter.java
-│   ├── SecurityConfig.java
-│   └── UserPrincipal.java
-│
 ├── user/
-│   ├── dto/
-│   │   ├── UserResponse.java
-│   │   ├── AdminUserResponse.java
-│   │   └── UpdateRoleRequest.java
-│   ├── mapper/UserMapper.java
-│   ├── User.java
-│   ├── Role.java
-│   ├── UserRepository.java
-│   ├── UserController.java
-│   └── UserService.java
-│
 ├── account/
-│   ├── dto/
-│   │   ├── CreateAccountRequest.java
-│   │   ├── UpdateAccountRequest.java
-│   │   └── AccountResponse.java
-│   ├── mapper/AccountMapper.java
-│   ├── Account.java
-│   ├── AccountRepository.java
-│   ├── AccountController.java
-│   └── AccountService.java
-│
 ├── transaction/
-│   ├── dto/
-│   │   ├── CreateIncomeRequest.java
-│   │   ├── CreateExpenseRequest.java
-│   │   ├── TransactionResponse.java
-│   │   └── TransactionQuery.java
-│   ├── mapper/TransactionMapper.java
-│   ├── Transaction.java
-│   ├── TransactionRepository.java
-│   ├── TransactionController.java
-│   └── TransactionService.java
-│
 ├── transfer/
-│   ├── dto/
-│   │   ├── TransferRequest.java
-│   │   └── TransferResponse.java
-│   ├── mapper/TransferMapper.java
-│   ├── TransferController.java
-│   └── TransferService.java
-│
 ├── dashboard/
-│   ├── dto/DashboardSummaryResponse.java
-│   ├── DashboardController.java
-│   └── DashboardService.java
-│
 └── health/
-    └── HealthController.java
 ```
+
+Architecture follows:
+
+Controller → Service → Repository → Database
 
 ---
 
 # 🗄️ Database Design
 
-## User
-- id (PK)
-- email (unique)
-- password_hash
-- role (USER / ADMIN)
-- is_active
-- created_at
+## 1️⃣ User Table
 
-## Account
-- id (PK)
-- name
-- balance
-- user_id (FK → User.id)
-- created_at
-
-## Transaction
-- id (PK)
-- type (INCOME / EXPENSE / TRANSFER)
-- amount
-- note
-- account_id (FK → Account.id)
-- created_at
-
-## Relationships
-- One User → Many Accounts
-- One Account → Many Transactions
+Field Type Description
 
 ---
 
-# 🔗 API Endpoints
+id BIGINT (PK) Unique identifier
+email VARCHAR Unique email
+password_hash VARCHAR Encrypted password
+role ENUM (USER, ADMIN) User role
+is_active BOOLEAN Account status
+created_at TIMESTAMP Creation time
 
-## 🔐 Authentication
+### Relationship
 
-| Method | Endpoint |
-|--------|----------|
-| POST | /api/auth/register |
-| POST | /api/auth/login |
-| POST | /api/auth/refresh |
-| POST | /api/auth/logout |
-| GET  | /api/auth/me |
-
-## 💼 Accounts
-
-| Method | Endpoint |
-|--------|----------|
-| GET | /api/accounts |
-| POST | /api/accounts |
-| PUT | /api/accounts/{id} |
-
-## 💰 Transactions
-
-| Method | Endpoint |
-|--------|----------|
-| GET | /api/transactions |
-| POST | /api/transactions/income |
-| POST | /api/transactions/expense |
-
-## 🔁 Transfers
-
-| Method | Endpoint |
-|--------|----------|
-| POST | /api/transfers |
-
-## 📊 Dashboard
-
-| Method | Endpoint |
-|--------|----------|
-| GET | /api/dashboard/summary |
-
-## 🛡 Admin
-
-| Method | Endpoint |
-|--------|----------|
-| GET | /api/admin/users |
-| PATCH | /api/admin/users/{id}/role |
+- One **User** → Many **Accounts**
+- One **User** → Many **Transactions (through accounts)**
 
 ---
 
-# 🛠 Run Backend
+## 2️⃣ Account Table
 
-## 1️⃣ Configure Database
-
-Update `application.yml`:
-
-```
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/finance_manager
-    username: postgres
-    password: your_password
-```
-
-## 2️⃣ Run Application
-
-```
-./mvnw spring-boot:run
-```
-
-Backend runs at:
-
-```
-http://localhost:8080
-```
+Field Type Description
 
 ---
 
-# 👨‍👩‍👧‍👦 Team Contribution (Backend)
+id BIGINT (PK) Account ID
+name VARCHAR Account name (Cash, Savings, etc.)
+balance DECIMAL Current balance
+user_id BIGINT (FK → User.id) Owner
+created_at TIMESTAMP Creation time
 
-| Member   | Responsibility |
-|----------|---------------|
-| Masterly | Auth & Security Configuration |
-| Raksa    | Account Logic & Balance Management |
-| Chhai    | Transaction Module |
-| Heang    | Dashboard Logic |
-| Narin    | Admin APIs & Role Management |
+### Relationship
+
+- Many **Accounts** belong to One **User**
+- One **Account** → Many **Transactions**
+- One **Account** can be source or destination of Transfers
 
 ---
 
-# 🎯 Academic Purpose
+## 3️⃣ Transaction Table
 
-This backend demonstrates:
+Field Type Description
+
+---
+
+id BIGINT (PK) Transaction ID
+type ENUM (INCOME, EXPENSE, TRANSFER) Transaction type
+amount DECIMAL Amount
+note TEXT Description
+account_id BIGINT (FK → Account.id) Linked account
+created_at TIMESTAMP Creation time
+
+### Relationship
+
+- Many **Transactions** belong to One **Account**
+- Transfers create transaction records for tracking
+
+---
+
+# 🔗 Entity Relationship Summary
+
+User (1) ──── (N) Account\
+Account (1) ──── (N) Transaction
+
+Transfer is handled logically by: - Deducting from source account -
+Adding to destination account - Recording transaction history
+
+---
+
+# 🔄 Business Rules
+
+- Income → balance += amount
+- Expense → balance -= amount
+- Transfer → subtract from source account and add to destination
+  account
+- Users can only access their own data
+- Admin can access all users and transactions
+
+---
+
+# 🔐 API Endpoints
+
+## Authentication
+
+- POST /api/auth/register
+- POST /api/auth/login
+- POST /api/auth/refresh
+- POST /api/auth/logout
+- GET /api/auth/me
+
+## Accounts
+
+- GET /api/accounts
+- POST /api/accounts
+- PUT /api/accounts/{id}
+
+## Transactions
+
+- GET /api/transactions
+- POST /api/transactions/income
+- POST /api/transactions/expense
+
+## Transfers
+
+- POST /api/transfers
+
+## Dashboard
+
+- GET /api/dashboard/summary
+
+## Admin
+
+- GET /api/admin/users
+- PATCH /api/admin/users/{id}/role
+
+---
+
+# 🏗️ Security Flow
+
+1.  User logs in
+2.  Server validates credentials
+3.  Server generates Access Token (JWT)
+4.  Refresh token stored as HttpOnly cookie
+5.  JWT is validated on every protected request
+
+---
+
+# 🎯 Expected Outcome
 
 - Secure JWT authentication
-- Role-based access control
-- Clean layered architecture
-- Proper DTO separation
-- Service & repository pattern usage
-- Real-world REST API design
+- Accurate financial calculations
+- Proper role-based access control
+- Clean architecture implementation
+- Academic-quality backend submission
 
 ---
 
-# 📄 License
+# 📖 Conclusion
 
-Academic project – non-commercial use.
+This backend project demonstrates secure REST API development, financial
+data management, entity relationships, and role-based authorization
+using Spring Boot and PostgreSQL.
