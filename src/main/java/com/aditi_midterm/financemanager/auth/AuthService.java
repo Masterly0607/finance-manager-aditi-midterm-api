@@ -71,8 +71,17 @@ public class AuthService {
                 .isActive(true)
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // your JwtService expects 3 arguments
+        return jwtService.generateAccessToken(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getRole()
+        );
     }
+
+
 
     // ------------------------
     // Login (Spring Security checks password via UserDetailsService)
