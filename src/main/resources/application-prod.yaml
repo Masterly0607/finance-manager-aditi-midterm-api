@@ -1,9 +1,9 @@
 server:
   port: ${PORT:8080}
 
-spring:
-  profiles:
-    active: prod
+#spring:
+#  profiles:
+#    active: prod
 
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
