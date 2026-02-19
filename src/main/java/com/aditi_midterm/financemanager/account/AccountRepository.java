@@ -18,4 +18,5 @@ public interface AccountRepository extends JpaRepository<Account,Long> {
     Optional<Account> findByIdAndUserId(Long id, Long userId);
     @Query("select coalesce(sum(a.balance), 0) from Account a where a.user.id = :userId")
     BigDecimal sumBalanceByUserId(@Param("userId") Long userId);
+    Optional<Account> findByNameAndUserId(String name, Long userId);
 }

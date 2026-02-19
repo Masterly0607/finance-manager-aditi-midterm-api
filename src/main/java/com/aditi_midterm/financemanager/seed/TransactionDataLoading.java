@@ -26,11 +26,12 @@ public class TransactionDataLoading implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         if (transactionRepository.count() > 0) return;
+        Long targetUserId = 6L;
 
-        Account cash = accountRepository.findByName("Cash Wallet")
+        Account cash = accountRepository.findByNameAndUserId("Cash Wallet", targetUserId)
                 .orElse(null);
 
-        Account bank = accountRepository.findByName("ABA Bank")
+        Account bank = accountRepository.findByNameAndUserId("ABA Bank", targetUserId)
                 .orElse(null);
 
         if (cash == null || bank == null) {

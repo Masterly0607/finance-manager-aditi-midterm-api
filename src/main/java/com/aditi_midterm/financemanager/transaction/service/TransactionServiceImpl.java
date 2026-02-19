@@ -30,14 +30,14 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
 
     @Override
-    public List<TransactionResponse> getAllTransactions(Pagination pagination) {
+    public List<TransactionResponse> getAllTransactions(Pagination pagination, Long userId) {
 
         Pageable pageable = PageRequest.of(pagination.getPage(),
                 pagination.getSize(),
                 Sort.by("id").descending()
         );
 
-        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        Page<Transaction> transactions = transactionRepository.findByAccountUserId(userId, pageable);
         List<Transaction> transactionList = transactions.getContent();
 
         pagination.setTotal(transactions.getTotalElements());
@@ -54,8 +54,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionResponse getTransactionById(Long id) {
-        return transactionRepository.findTransactionById(id)
+    public TransactionResponse getTransactionById(Long id, Long userId) {
+        return transactionRepository.findByIdAndAccountUserId(id, userId)
                 .map(transactionMapper::toTransactionResponse)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Transaction", "transaction", id)
@@ -63,8 +63,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest) {
-        Account account = accountRepository.findById(addTransactionRequest.getAccountId())
+    public TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest, Long userId) {
+        Account account = accountRepository.findByIdAndUserId(addTransactionRequest.getAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Account", "id", addTransactionRequest.getAccountId()
                 ));
@@ -76,9 +76,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionResponse updateTransaction(Long id, UpdateTransactionRequest updateTransactionRequest) {
+    public TransactionResponse updateTransaction(Long id, UpdateTransactionRequest updateTransactionRequest, Long userId) {
 
-        Transaction transaction = transactionRepository.findById(id)
+        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
 
         transactionMapper.updateEntity(updateTransactionRequest, transaction);
@@ -87,8 +87,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void deleteTransaction(Long id) {
-        Transaction transaction = transactionRepository.findById(id)
+    public void deleteTransaction(Long id, Long userId) {
+        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Transaction", "id", id
                 ));
