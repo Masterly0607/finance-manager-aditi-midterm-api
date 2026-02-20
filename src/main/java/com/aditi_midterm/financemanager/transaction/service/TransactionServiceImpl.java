@@ -6,6 +6,7 @@ import com.aditi_midterm.financemanager.exception.ResourceNotFoundException;
 import com.aditi_midterm.financemanager.transaction.Transaction;
 import com.aditi_midterm.financemanager.transaction.TransactionMapper;
 import com.aditi_midterm.financemanager.transaction.TransactionRepository;
+import com.aditi_midterm.financemanager.transaction.TransactionType;
 import com.aditi_midterm.financemanager.transaction.dto.AddTransactionRequest;
 import com.aditi_midterm.financemanager.transaction.dto.Pagination;
 import com.aditi_midterm.financemanager.transaction.dto.TransactionResponse;
@@ -25,73 +26,82 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
-    private final AccountRepository accountRepository;
-    private final TransactionMapper transactionMapper;
+  private final TransactionRepository transactionRepository;
+  private final AccountRepository accountRepository;
+  private final TransactionMapper transactionMapper;
 
-    @Override
-    public List<TransactionResponse> getAllTransactions(Pagination pagination, Long userId) {
+  @Override
+  public List<TransactionResponse> getAllTransactions(
+      Pagination pagination, Long userId, Long account, String type, String search) {
 
-        Pageable pageable = PageRequest.of(pagination.getPage(),
-                pagination.getSize(),
-                Sort.by("id").descending()
-        );
+    Pageable pageable =
+        PageRequest.of(pagination.getPage(), pagination.getSize(), Sort.by("id").descending());
 
-        Page<Transaction> transactions = transactionRepository.findByAccountUserId(userId, pageable);
-        List<Transaction> transactionList = transactions.getContent();
+    Page<Transaction> transactions;
 
-        pagination.setTotal(transactions.getTotalElements());
-        pagination.setTotalPage(transactions.getTotalPages());
-
-        List<TransactionResponse> transactionResponseList = new ArrayList<>();
-
-        for (Transaction transaction : transactionList) {
-            TransactionResponse transactionResponse = transactionMapper.toTransactionResponse(transaction);
-            transactionResponseList.add(transactionResponse);
-        }
-
-        return transactionResponseList;
+    if (account != null) {
+      transactions =
+          transactionRepository.findByAccountUserIdAndAccountId(userId, account, pageable);
+    } else if (type != null && !type.isBlank()) {
+      transactions =
+          transactionRepository.findByAccountUserIdAndType(userId, TransactionType.valueOf(type), pageable);
+    } else {
+      transactions = transactionRepository.findByAccountUserId(userId, pageable);
     }
 
-    @Override
-    public TransactionResponse getTransactionById(Long id, Long userId) {
-        return transactionRepository.findByIdAndAccountUserId(id, userId)
-                .map(transactionMapper::toTransactionResponse)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Transaction", "transaction", id)
-                );
-    }
+    pagination.setTotal(transactions.getTotalElements());
+    pagination.setTotalPage(transactions.getTotalPages());
 
-    @Override
-    public TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest, Long userId) {
-        Account account = accountRepository.findByIdAndUserId(addTransactionRequest.getAccountId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Account", "id", addTransactionRequest.getAccountId()
-                ));
-        Transaction transaction = transactionMapper.toTransaction(addTransactionRequest);
-        transaction.setAccount(account);
+    return transactions.getContent().stream()
+        .map(transactionMapper::toTransactionResponse)
+        .toList();
+  }
 
-        Transaction savedTransaction = transactionRepository.save(transaction);
-        return transactionMapper.toTransactionResponse(savedTransaction);
-    }
+  @Override
+  public TransactionResponse getTransactionById(Long id, Long userId) {
+    return transactionRepository
+        .findByIdAndAccountUserId(id, userId)
+        .map(transactionMapper::toTransactionResponse)
+        .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
+  }
 
-    @Override
-    public TransactionResponse updateTransaction(Long id, UpdateTransactionRequest updateTransactionRequest, Long userId) {
+  @Override
+  public TransactionResponse addTransaction(
+      AddTransactionRequest addTransactionRequest, Long userId) {
+    Account account =
+        accountRepository
+            .findByIdAndUserId(addTransactionRequest.getAccountId(), userId)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "Account", "id", addTransactionRequest.getAccountId()));
+    Transaction transaction = transactionMapper.toTransaction(addTransactionRequest);
+    transaction.setAccount(account);
 
-        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
+    Transaction savedTransaction = transactionRepository.save(transaction);
+    return transactionMapper.toTransactionResponse(savedTransaction);
+  }
 
-        transactionMapper.updateEntity(updateTransactionRequest, transaction);
-        Transaction updated =  transactionRepository.save(transaction);
-        return transactionMapper.toTransactionResponse(updated);
-    }
+  @Override
+  public TransactionResponse updateTransaction(
+      Long id, UpdateTransactionRequest updateTransactionRequest, Long userId) {
 
-    @Override
-    public void deleteTransaction(Long id, Long userId) {
-        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Transaction", "id", id
-                ));
-        transactionRepository.delete(transaction);
-    }
+    Transaction transaction =
+        transactionRepository
+            .findByIdAndAccountUserId(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
+
+    transactionMapper.updateEntity(updateTransactionRequest, transaction);
+    Transaction updated = transactionRepository.save(transaction);
+    return transactionMapper.toTransactionResponse(updated);
+  }
+
+  @Override
+  public void deleteTransaction(Long id, Long userId) {
+    Transaction transaction =
+        transactionRepository
+            .findByIdAndAccountUserId(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
+    transactionRepository.delete(transaction);
+  }
 }
