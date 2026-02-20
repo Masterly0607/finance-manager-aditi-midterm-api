@@ -16,6 +16,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Optional<Transaction> findTransactionById(Long id, Long userId);
     Optional<Transaction> findByIdAndAccountUserId(Long id, Long userId);
     Page<Transaction> findByAccountUserId(Long userId, Pageable pageable);
+    Page<Transaction> findByAccountUserIdAndAccountId(
+            Long userId,
+            Long accountId,
+            Pageable pageable);
+
+    Page<Transaction> findByAccountUserIdAndType(
+            Long userId,
+            TransactionType type,
+            Pageable pageable);
     @Query("""
        select coalesce(sum(t.amount), 0)
        from Transaction t
