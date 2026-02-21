@@ -8,15 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aditi_midterm.financemanager.admin.dto.AdminResponse;
+import com.aditi_midterm.financemanager.admin.dto.UserRequestDto;
 import com.aditi_midterm.financemanager.shared.ApiResponse;
 import com.aditi_midterm.financemanager.shared.Pagination;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,17 +31,27 @@ public class AdminController {
     public static final String BASE_URL = "/api/admin";
     private final AdminService adminService;
 
+
+    // Create a new user
+    @PostMapping("/users")
+    public ResponseEntity<ApiResponse<?>> createUser(
+            @Valid @RequestBody UserRequestDto userRequestDto
+    ){
+        ApiResponse<?> response = adminService.createUser(userRequestDto);
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<Pagination<AdminResponse>>> getAllUsers(
-        @PageableDefault(
-            size = 10,
-            page = 0,
-            sort = "id",
-            direction = Sort.Direction.DESC
-        )
-        Pageable pageable,
-        @RequestParam(required = false) String role,
-        HttpServletResponse response
+            @PageableDefault(
+                    size = 10,
+                    page = 0,
+                    sort = "id",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable,
+            @RequestParam(required = false) String role,
+            HttpServletResponse response
     ) {
         System.out.println("filter user role: "+ role);
         ApiResponse<Pagination<AdminResponse>> responses = adminService.getAllUser(pageable, role);
@@ -51,7 +65,7 @@ public class AdminController {
 
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<ApiResponse<AdminResponse>> toggleUserRole(
-        @PathVariable Long id
+            @PathVariable Long id
     ){
         ApiResponse<AdminResponse> toggleUser = adminService.toggleUserRole(id);
         return ResponseEntity.ok(toggleUser);

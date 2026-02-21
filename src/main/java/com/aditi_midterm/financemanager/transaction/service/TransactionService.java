@@ -14,7 +14,6 @@ public interface TransactionService {
 
   TransactionResponse getTransactionById(Long id, Long userId);
 
-//  TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest, Long userId);
   TransactionResponse addIncome(AddTransactionRequest addTransactionRequest, Long userId);
   TransactionResponse addExpense(AddTransactionRequest addTransactionRequest, Long userId);
 

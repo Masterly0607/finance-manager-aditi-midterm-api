@@ -1,17 +1,18 @@
 package com.aditi_midterm.financemanager.admin;
 
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.aditi_midterm.financemanager.admin.dto.AdminResponse;
+import com.aditi_midterm.financemanager.admin.dto.UserRequestDto;
 import com.aditi_midterm.financemanager.exception.BadRequestException;
 import com.aditi_midterm.financemanager.shared.ApiResponse;
 import com.aditi_midterm.financemanager.shared.Pagination;
 import com.aditi_midterm.financemanager.user.Role;
 import com.aditi_midterm.financemanager.user.User;
-
 
 import lombok.RequiredArgsConstructor;
 
@@ -68,5 +69,20 @@ public class AdminServiceImp implements AdminService {
         AdminResponse response = adminMapper.toAdminResponse(updatedUser);
 
         return ApiResponse.success(response, "User role toggle successfully");
+    }
+
+    @Override
+    public ApiResponse<User> createUser(UserRequestDto userRequestDto) {
+        // check if email already exists
+        Optional<User> user = adminRepository.findByEmail(userRequestDto.email());
+        if (user.isPresent()) {
+            throw new BadRequestException("Email already existed");
+        }
+        try {
+            User newUser = adminMapper.toUser(userRequestDto);
+            return ApiResponse.success(adminRepository.save(newUser), "User created successfully");
+        } catch (Exception e) {
+            throw new BadRequestException("Internal server error: " + e.getMessage());
+        }
     }
 }
