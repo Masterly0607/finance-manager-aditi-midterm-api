@@ -32,6 +32,7 @@ public class AdminController {
     private final AdminService adminService;
 
 
+    // Create a new user
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<?>> createUser(
         @Valid @RequestBody UserRequestDto userRequestDto
