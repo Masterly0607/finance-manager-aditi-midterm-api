@@ -37,18 +37,16 @@ public class TransactionServiceImpl implements TransactionService {
     Pageable pageable =
         PageRequest.of(pagination.getPage(), pagination.getSize(), Sort.by("id").descending());
 
-    Page<Transaction> transactions;
-
-    if (account != null) {
-      transactions =
-          transactionRepository.findByAccountUserIdAndAccountId(userId, account, pageable);
-    } else if (type != null && !type.isBlank()) {
-      transactions =
-          transactionRepository.findByAccountUserIdAndType(
-              userId, TransactionType.valueOf(type), pageable);
-    } else {
-      transactions = transactionRepository.findByAccountUserId(userId, pageable);
+    TransactionType transactionType = null;
+    if (type != null && !type.isBlank()) {
+      transactionType = TransactionType.valueOf(type);
     }
+
+    String searchValue = (search == null || search.isBlank()) ? null : search;
+
+    Page<Transaction> transactions =
+        transactionRepository.findWithFilters(
+            userId, account, transactionType, searchValue, pageable);
 
     pagination.setTotal(transactions.getTotalElements());
     pagination.setTotalPage(transactions.getTotalPages());
