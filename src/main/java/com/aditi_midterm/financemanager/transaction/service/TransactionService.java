@@ -10,6 +10,7 @@ import java.util.List;
 public interface TransactionService {
 
   List<TransactionResponse> getAllTransactions(
+<<<<<<< HEAD
           Pagination pagination, Long userId, Long account, String type, String search);
 
   TransactionResponse getTransactionById(Long id, Long userId);
@@ -19,6 +20,16 @@ public interface TransactionService {
 
   TransactionResponse updateTransaction(
           Long id, UpdateTransactionRequest updateTransactionRequest, Long userId);
+=======
+      Pagination pagination, Long userId, Long account, String type, String search);
+
+  TransactionResponse getTransactionById(Long id, Long userId);
+
+  TransactionResponse addTransaction(AddTransactionRequest addTransactionRequest, Long userId);
+
+  TransactionResponse updateTransaction(
+      Long id, UpdateTransactionRequest updateTransactionRequest, Long userId);
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
 
   void deleteTransaction(Long id, Long userId);
 }

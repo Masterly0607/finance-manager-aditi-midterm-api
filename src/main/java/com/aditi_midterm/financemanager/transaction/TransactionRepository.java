@@ -13,23 +13,23 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-  Optional<Transaction> findTransactionById(Long id, Long userId);
-  Optional<Transaction> findByIdAndAccountUserId(Long id, Long userId);
-  Page<Transaction> findByAccountUserId(Long userId, Pageable pageable);
-  Page<Transaction> findByAccountUserIdAndAccountId(
-          Long userId,
-          Long accountId,
-          Pageable pageable);
+    Optional<Transaction> findTransactionById(Long id, Long userId);
+    Optional<Transaction> findByIdAndAccountUserId(Long id, Long userId);
+    Page<Transaction> findByAccountUserId(Long userId, Pageable pageable);
+    Page<Transaction> findByAccountUserIdAndAccountId(
+            Long userId,
+            Long accountId,
+            Pageable pageable);
 
-  Page<Transaction> findByAccountUserIdAndType(
-          Long userId,
-          TransactionType type,
-          Pageable pageable);
-  @Query("""
+    Page<Transaction> findByAccountUserIdAndType(
+            Long userId,
+            TransactionType type,
+            Pageable pageable);
+    @Query("""
        select coalesce(sum(t.amount), 0)
        from Transaction t
        where t.account.user.id = :userId
          and t.type = :type
        """)
-  BigDecimal sumAmountByUserAndType(@Param("userId") Long userId, @Param("type") TransactionType type);
+    BigDecimal sumAmountByUserAndType(@Param("userId") Long userId, @Param("type") TransactionType type);
 }

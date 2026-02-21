@@ -1,0 +1,72 @@
+package com.aditi_midterm.financemanager.admin;
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.aditi_midterm.financemanager.admin.dto.AdminResponse;
+import com.aditi_midterm.financemanager.exception.BadRequestException;
+import com.aditi_midterm.financemanager.shared.ApiResponse;
+import com.aditi_midterm.financemanager.shared.Pagination;
+import com.aditi_midterm.financemanager.user.Role;
+import com.aditi_midterm.financemanager.user.User;
+
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class AdminServiceImp implements AdminService {
+
+    private final AdminRepository adminRepository;
+    private final AdminMapper adminMapper;
+
+    @Override
+    public ApiResponse<Pagination<AdminResponse>> getAllUser(Pageable pageable, String role) {
+        Page<User> page;
+        if (role == null || role.isEmpty()) {
+            // return all USERS
+            page = adminRepository.findAll(pageable);
+        } else {
+            try {
+                Role filterRole = Role.valueOf(role.toUpperCase());
+                page = adminRepository.getAllUsersWithUserRole(pageable, filterRole);
+
+            } catch (IllegalArgumentException e) {
+                page = Page.empty(pageable);
+            }
+        }
+
+        Pagination<AdminResponse> pagination = new Pagination<>(
+                page.getContent()
+                        .stream()
+                        .map(adminMapper::toAdminResponse)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast() ? 1 : 0);
+
+        return ApiResponse.success(pagination, "Users fetches successfully");
+    }
+
+    @Override
+    public ApiResponse<AdminResponse> toggleUserRole(Long id) {
+        // Find user by ID
+        User user = adminRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        // Toggle role
+        if (user.getRole() == Role.ADMIN) {
+            user.setRole(Role.USER);
+        } else {
+            user.setRole(Role.ADMIN);
+        }
+        User updatedUser = adminRepository.save(user);
+        AdminResponse response = adminMapper.toAdminResponse(updatedUser);
+
+        return ApiResponse.success(response, "User role toggle successfully");
+    }
+}

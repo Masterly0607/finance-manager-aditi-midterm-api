@@ -11,6 +11,7 @@ import com.aditi_midterm.financemanager.transfer.dto.TransferResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
@@ -24,6 +25,7 @@ public class TransferService {
   private final AccountRepository accountRepository;
   private final TransferMapper transferMapper;
 
+<<<<<<< HEAD
   @Transactional
   public TransferResponse transfer(TransferRequest request) {
 
@@ -66,4 +68,60 @@ public class TransferService {
 
     return transferMapper.toResponse(transfer);
   }
+=======
+
+
+    @Transactional
+    public TransferResponse transfer(TransferRequest request) {
+
+        if (request.getFromAccountId().equals(request.getToAccountId())) {
+            throw new IllegalArgumentException("Cannot transfer to same account");
+        }
+
+        Account from = accountRepository.findById(request.getFromAccountId())
+                .orElseThrow(() -> new ResourceNotFoundException("Account", "id", request.getFromAccountId()));
+
+        Account to = accountRepository.findById(request.getToAccountId())
+                .orElseThrow(() -> new ResourceNotFoundException("Account", "id", request.getToAccountId()));
+
+        BigDecimal amount = request.getAmount();
+
+        //  check enough money
+        if (from.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+
+        // update balances (IMPORTANT)
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+
+        // persist balances
+        accountRepository.save(from);
+        accountRepository.save(to);
+
+        // save transfer history
+        Transfer transfer = transferMapper.toTransfer(request, from, to);
+        transferRepository.save(transfer);
+
+        // save transactions for history
+        Transaction expense = Transaction.builder()
+                .account(from)
+                .type(TransactionType.EXPENSE)
+                .amount(amount)
+                .note("Transfer to account " + to.getId())
+                .build();
+
+        Transaction income = Transaction.builder()
+                .account(to)
+                .type(TransactionType.INCOME)
+                .amount(amount)
+                .note("Transfer from account " + from.getId())
+                .build();
+
+        transactionRepository.saveAll(List.of(expense, income));
+
+        return transferMapper.toResponse(transfer);
+    }
+
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
 }

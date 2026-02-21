@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,20 +31,34 @@ public class TransactionServiceImpl implements TransactionService {
 
   @Override
   public List<TransactionResponse> getAllTransactions(
+<<<<<<< HEAD
           Pagination pagination, Long userId, Long account, String type, String search) {
 
     Pageable pageable =
             PageRequest.of(pagination.getPage(), pagination.getSize(), Sort.by("id").descending());
+=======
+      Pagination pagination, Long userId, Long account, String type, String search) {
+
+    Pageable pageable =
+        PageRequest.of(pagination.getPage(), pagination.getSize(), Sort.by("id").descending());
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
 
     Page<Transaction> transactions;
 
     if (account != null) {
       transactions =
+<<<<<<< HEAD
               transactionRepository.findByAccountUserIdAndAccountId(userId, account, pageable);
     } else if (type != null && !type.isBlank()) {
       transactions =
               transactionRepository.findByAccountUserIdAndType(
                       userId, TransactionType.valueOf(type), pageable);
+=======
+          transactionRepository.findByAccountUserIdAndAccountId(userId, account, pageable);
+    } else if (type != null && !type.isBlank()) {
+      transactions =
+          transactionRepository.findByAccountUserIdAndType(userId, TransactionType.valueOf(type), pageable);
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
     } else {
       transactions = transactionRepository.findByAccountUserId(userId, pageable);
     }
@@ -54,13 +67,19 @@ public class TransactionServiceImpl implements TransactionService {
     pagination.setTotalPage(transactions.getTotalPages());
 
     return transactions.getContent().stream()
+<<<<<<< HEAD
             .map(transactionMapper::toTransactionResponse)
             .toList();
+=======
+        .map(transactionMapper::toTransactionResponse)
+        .toList();
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
   }
 
   @Override
   public TransactionResponse getTransactionById(Long id, Long userId) {
     return transactionRepository
+<<<<<<< HEAD
             .findByIdAndAccountUserId(id, userId)
             .map(transactionMapper::toTransactionResponse)
             .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
@@ -74,16 +93,47 @@ public class TransactionServiceImpl implements TransactionService {
   @Override
   public TransactionResponse addExpense(AddTransactionRequest addTransactionRequest, Long userId) {
     return addTransactionByType(addTransactionRequest, TransactionType.EXPENSE, userId);
+=======
+        .findByIdAndAccountUserId(id, userId)
+        .map(transactionMapper::toTransactionResponse)
+        .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
+  }
+
+  @Override
+  public TransactionResponse addTransaction(
+      AddTransactionRequest addTransactionRequest, Long userId) {
+    Account account =
+        accountRepository
+            .findByIdAndUserId(addTransactionRequest.getAccountId(), userId)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "Account", "id", addTransactionRequest.getAccountId()));
+    Transaction transaction = transactionMapper.toTransaction(addTransactionRequest);
+    transaction.setAccount(account);
+
+    Transaction savedTransaction = transactionRepository.save(transaction);
+    return transactionMapper.toTransactionResponse(savedTransaction);
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
   }
 
   @Override
   public TransactionResponse updateTransaction(
+<<<<<<< HEAD
           Long id, UpdateTransactionRequest updateTransactionRequest, Long userId) {
 
     Transaction transaction =
             transactionRepository
                     .findByIdAndAccountUserId(id, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
+=======
+      Long id, UpdateTransactionRequest updateTransactionRequest, Long userId) {
+
+    Transaction transaction =
+        transactionRepository
+            .findByIdAndAccountUserId(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "transaction", id));
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
 
     transactionMapper.updateEntity(updateTransactionRequest, transaction);
     Transaction updated = transactionRepository.save(transaction);
@@ -93,6 +143,7 @@ public class TransactionServiceImpl implements TransactionService {
   @Override
   public void deleteTransaction(Long id, Long userId) {
     Transaction transaction =
+<<<<<<< HEAD
             transactionRepository
                     .findByIdAndAccountUserId(id, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
@@ -113,4 +164,11 @@ public class TransactionServiceImpl implements TransactionService {
     Transaction saved = transactionRepository.save(transaction);
     return transactionMapper.toTransactionResponse(saved);
   }
+=======
+        transactionRepository
+            .findByIdAndAccountUserId(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
+    transactionRepository.delete(transaction);
+  }
+>>>>>>> b35b615dbcb19d507e39803e66e5fe647ad91bd2
 }
