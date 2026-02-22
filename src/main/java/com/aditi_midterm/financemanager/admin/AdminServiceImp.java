@@ -109,4 +109,30 @@ public class AdminServiceImp implements AdminService {
             throw new BadRequestException("Internal server error: " + e.getMessage());
         }
     }
+
+    @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
+    public ApiResponse<AdminResponse> toggleUserStatus(Long id) {
+        // Find user by ID
+        User user = adminRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        // Toggle status
+        user.setIsActive(!user.getIsActive());
+        User updatedUser = adminRepository.save(user);
+        AdminResponse response = adminMapper.toAdminResponse(updatedUser);
+
+        return ApiResponse.success(response, "User status toggled successfully");
+    }
+
+    @Override
+    @PreAuthorize( "hasRole( 'ADMIN' )" )
+    public ApiResponse<?> deleteUser(Long id) {
+        // check if user exists
+        User user = adminRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+        adminRepository.delete(user);
+        return ApiResponse.success(user, "User deleted successfully");
+    }
+
 }

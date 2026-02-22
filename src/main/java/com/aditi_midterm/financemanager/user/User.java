@@ -34,7 +34,7 @@ public class User {
     @Column(nullable = false)
     private Instant updatedAt;
 
-//   @PrePersist =  Runs before INSERT
+    //   @PrePersist =  Runs before INSERT
 //    Sets timestamps automatically, Assigns default role, and Activates.
     @PrePersist
     void onCreate() {
@@ -45,7 +45,7 @@ public class User {
         if (isActive == null) isActive = true;
     }
 
-//  @PreUpdate = Runs before updating field.
+    //  @PreUpdate = Runs before updating field.
 //  Keeps updatedAt always correct. No manual update needed in service layer
     @PreUpdate
     void onUpdate() {

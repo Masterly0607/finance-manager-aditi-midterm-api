@@ -18,4 +18,8 @@ public interface AdminService {
 
     ApiResponse<AdminResponse> toggleUserRole(Long id);
 
+    ApiResponse<AdminResponse> toggleUserStatus(Long id);
+
+    ApiResponse<?> deleteUser(Long id);
+
 }
