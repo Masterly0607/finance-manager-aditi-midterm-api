@@ -1,9 +1,12 @@
 package com.aditi_midterm.financemanager.admin;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.aditi_midterm.financemanager.admin.dto.AdminResponse;
@@ -20,10 +23,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminServiceImp implements AdminService {
 
+    private static final Logger LOGGER = Logger.getLogger(AdminServiceImp.class.getName());
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
     private final AdminMapper adminMapper;
 
+    //=============== Get User =====================
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public ApiResponse<Pagination<AdminResponse>> getAllUser(Pageable pageable, String role) {
         Page<User> page;
         if (role == null || role.isEmpty()) {
@@ -53,7 +60,9 @@ public class AdminServiceImp implements AdminService {
         return ApiResponse.success(pagination, "Users fetches successfully");
     }
 
+    //=============== Toggle User Role =====================
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public ApiResponse<AdminResponse> toggleUserRole(Long id) {
         // Find user by ID
         User user = adminRepository.findById(id)
@@ -71,7 +80,9 @@ public class AdminServiceImp implements AdminService {
         return ApiResponse.success(response, "User role toggle successfully");
     }
 
+    //=============== Create User =====================
     @Override
+    @PreAuthorize( "hasRole('ADMIN')")
     public ApiResponse<User> createUser(UserRequestDto userRequestDto) {
         // check if email already exists
         Optional<User> user = adminRepository.findByEmail(userRequestDto.email());
@@ -79,8 +90,21 @@ public class AdminServiceImp implements AdminService {
             throw new BadRequestException("Email already existed");
         }
         try {
-            User newUser = adminMapper.toUser(userRequestDto);
-            return ApiResponse.success(adminRepository.save(newUser), "User created successfully");
+
+            String hashPassword = passwordEncoder.encode(userRequestDto.passwordHash());
+
+            User newuser = User.builder()
+                    .email(userRequestDto.email())
+                    .passwordHash(hashPassword)
+                    .role(Role.valueOf(userRequestDto.role().toUpperCase()))
+                    .isActive(userRequestDto.isActive()  != null ? userRequestDto.isActive() : true)
+                    .build();
+
+            LOGGER.info(() -> "new user info: "+ newuser);
+
+            adminRepository.save(newuser);
+            return ApiResponse.success(newuser, "User created successfully");
+
         } catch (Exception e) {
             throw new BadRequestException("Internal server error: " + e.getMessage());
         }
