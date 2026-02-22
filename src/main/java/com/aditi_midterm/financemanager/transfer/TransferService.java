@@ -59,22 +59,14 @@ public class TransferService {
         Transfer transfer = transferMapper.toTransfer(request, from, to);
         transferRepository.save(transfer);
 
-        // save transactions for history
-        Transaction expense = Transaction.builder()
+        Transaction transferTx = Transaction.builder()
                 .account(from)
-                .type(TransactionType.EXPENSE)
+                .type(TransactionType.TRANSFER)
                 .amount(amount)
-                .note("Transfer to account " + to.getId())
+                .note("Transfer from account " + from.getId() + " to " + to.getId())
                 .build();
 
-        Transaction income = Transaction.builder()
-                .account(to)
-                .type(TransactionType.INCOME)
-                .amount(amount)
-                .note("Transfer from account " + from.getId())
-                .build();
-
-        transactionRepository.saveAll(List.of(expense, income));
+        transactionRepository.saveAll(List.of(transferTx));
 
         return transferMapper.toResponse(transfer);
     }
