@@ -20,31 +20,31 @@ import java.time.LocalDateTime;
 @Builder
 public class Account {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @NotBlank
-    @Size(min = 2, max = 100)
-    @Column(nullable = false)
-    private String name;
+  @NotBlank
+  @Size(min = 2, max = 100)
+  @Column(nullable = false)
+  private String name;
 
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = true)
-    @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal balance;
+  @NotNull
+  @DecimalMin(value = "0.0", inclusive = true)
+  @Column(nullable = false, precision = 19, scale = 2)
+  private BigDecimal balance;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @NotNull
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @NotNull
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
 }

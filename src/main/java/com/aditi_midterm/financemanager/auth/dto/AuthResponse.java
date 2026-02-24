@@ -1,7 +1,3 @@
 package com.aditi_midterm.financemanager.auth.dto;
 
-public record AuthResponse(
-        String token
-) {}
-
-
+public record AuthResponse(String token) {}

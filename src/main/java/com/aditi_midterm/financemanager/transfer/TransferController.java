@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TransferController {
 
-    private final TransferService transferService;
+  private final TransferService transferService;
 
-    @PostMapping
-    public ResponseEntity<TransferResponse> transfer(@Valid @RequestBody TransferRequest transferRequest) {
+  @PostMapping
+  public ResponseEntity<TransferResponse> transfer(
+      @Valid @RequestBody TransferRequest transferRequest) {
 
-        TransferResponse transferResponse = transferService.transfer(transferRequest);
-        return ResponseEntity.ok(transferResponse);
-    }
+    TransferResponse transferResponse = transferService.transfer(transferRequest);
+    return ResponseEntity.ok(transferResponse);
+  }
 }
