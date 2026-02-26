@@ -10,11 +10,12 @@ import java.time.LocalDateTime;
 @Data
 public class TransactionResponse {
 
-    private Long id;
-    private TransactionType transactionType;
-    private BigDecimal amount;
-    private String note;
+  private Long id;
+  private TransactionType transactionType;
+  private BigDecimal amount;
+  private String note;
 
-    private Long accountId;
-    private LocalDateTime createdDate;
+  private Long accountId;
+  private LocalDate transactionDate;
+  private LocalDateTime createdDate;
 }
