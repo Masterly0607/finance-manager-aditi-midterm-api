@@ -10,23 +10,24 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "account", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(source = "transactionType", target = "type")
-    Transaction toTransaction(AddTransactionRequest addTransactionRequest);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "account", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(source = "transactionDate", target = "transactionDate")
+  Transaction toTransaction(AddTransactionRequest addTransactionRequest);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "account", ignore = true)
-    @Mapping(target =  "createdAt", ignore = true)
-    @Mapping(source = "transactionType", target = "type")
-    void updateEntity(
-            UpdateTransactionRequest updateTransactionRequest,
-            @MappingTarget Transaction transaction
-    );
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "account", ignore = true)
+  @Mapping(target =  "createdAt", ignore = true)
+  @Mapping(source = "transactionType", target = "type")
+  @Mapping(source = "transactionDate", target = "transactionDate")
+  void updateEntity(
+          UpdateTransactionRequest updateTransactionRequest,
+          @MappingTarget Transaction transaction
+  );
 
-    @Mapping(source = "type", target = "transactionType")
-    @Mapping(source = "account.id", target = "accountId")
-    @Mapping(source = "createdAt", target = "createdDate")
-    TransactionResponse toTransactionResponse(Transaction transaction);
+  @Mapping(source = "type", target = "transactionType")
+  @Mapping(source = "account.id", target = "accountId")
+  @Mapping(source = "createdAt", target = "createdDate")
+  TransactionResponse toTransactionResponse(Transaction transaction);
 }
