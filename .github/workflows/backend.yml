@@ -46,7 +46,7 @@ jobs:
 
       - name: Build and push image with Jib
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/finance-manager-aditi-midterm-api:latest
+          IMAGE_NAME=ghcr.io/masterly0607/finance-manager-aditi-midterm-api:latest
           ./mvnw compile jib:build \
             -DskipTests \
             -Djib.to.image=$IMAGE_NAME \
