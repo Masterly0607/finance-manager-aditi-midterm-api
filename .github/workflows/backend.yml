@@ -1,18 +1,24 @@
-name: Backend CI
+name: Backend CI/CD + GHCR
 
 on:
   push:
     branches:
       - dev
+      - main
   pull_request:
     branches:
       - dev
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Spring Boot Backend
+  build-and-push:
+    name: Build and Push Spring Boot Image
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -29,4 +35,20 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build project
-        run: ./mvnw clean install -DskipTests
+        run: ./mvnw clean package -DskipTests
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image with Jib
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/finance-manager-aditi-midterm-api:latest
+          ./mvnw compile jib:build \
+            -DskipTests \
+            -Djib.to.image=$IMAGE_NAME \
+            -Djib.to.auth.username=${{ github.actor }} \
+            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
