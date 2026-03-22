@@ -31,6 +31,5 @@ public class AccountMapper {
 
     public void updateEntityFromRequest(Account account, UpdateAccountRequest request) {
         account.setName(request.getName());
-        account.setBalance(request.getBalance());
     }
 }

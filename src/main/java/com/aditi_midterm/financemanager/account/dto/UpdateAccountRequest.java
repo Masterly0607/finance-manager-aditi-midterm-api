@@ -17,8 +17,4 @@ import java.math.BigDecimal;
 public class UpdateAccountRequest {
     @NotBlank(message = "Account name is required")
     private String name;
-
-    @NotNull(message = "Balance is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Balance must be greater than or equal to 0")
-    private BigDecimal balance;
 }

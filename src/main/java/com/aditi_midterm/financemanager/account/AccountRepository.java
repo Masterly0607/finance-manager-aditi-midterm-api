@@ -12,10 +12,11 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<Account,Long> {
 
-    boolean existsByIdAndUserId(Long id, Long userId);
-    List<Account> findAllByUserId(Long userId);
-    Optional<Account> findByName(String bank);
-    Optional<Account> findByIdAndUserId(Long id, Long userId);
-    @Query("select coalesce(sum(a.balance), 0) from Account a where a.user.id = :userId")
-    BigDecimal sumBalanceByUserId(@Param("userId") Long userId);
+  boolean existsByIdAndUserId(Long id, Long userId);
+  List<Account> findAllByUserId(Long userId);
+  Optional<Account> findByName(String bank);
+  Optional<Account> findByIdAndUserId(Long id, Long userId);
+  @Query("select coalesce(sum(a.balance), 0) from Account a where a.user.id = :userId")
+  BigDecimal sumBalanceByUserId(@Param("userId") Long userId);
+  Optional<Account> findByNameAndUserId(String name, Long userId);
 }

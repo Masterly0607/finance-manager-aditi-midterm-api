@@ -9,20 +9,18 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TransferMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "fromAccount", source = "fromAccount")
-    @Mapping(target = "toAccount", source = "toAccount")
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    Transfer toTransfer(TransferRequest request, Account fromAccount, Account toAccount);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "fromAccount", source = "fromAccount")
+  @Mapping(target = "toAccount", source = "toAccount")
+  @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+  Transfer toTransfer(TransferRequest request, Account fromAccount, Account toAccount);
 
-    @Mapping(target = "transferId", source = "id")
-    @Mapping(target = "fromAccountId", source = "fromAccount.id")
-    @Mapping(target = "toAccountId", source = "toAccount.id")
-    @Mapping(target = "amount", source = "amount")
-    @Mapping(target = "note", source = "note")
-    @Mapping(target = "transferredAt", source = "createdAt")
-    @Mapping(target = "status", constant = "SUCCESS")
-    TransferResponse toResponse(Transfer transfer);
+  @Mapping(target = "transferId", source = "id")
+  @Mapping(target = "fromAccountId", source = "fromAccount.id")
+  @Mapping(target = "toAccountId", source = "toAccount.id")
+  @Mapping(target = "amount", source = "amount")
+  @Mapping(target = "note", source = "note")
+  @Mapping(target = "transferredAt", source = "createdAt")
+  @Mapping(target = "status", constant = "SUCCESS")
+  TransferResponse toResponse(Transfer transfer);
 }
-
-

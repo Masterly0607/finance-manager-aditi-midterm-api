@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TransferResponse {
 
-    private Long transferId;
-    private Long fromAccountId;
-    private Long toAccountId;
-    private BigDecimal amount;
-    private String note;
-    private LocalDateTime transferredAt;
-    private String status;
+  private Long transferId;
+  private Long fromAccountId;
+  private Long toAccountId;
+  private BigDecimal amount;
+  private String note;
+  private LocalDateTime transferredAt;
+  private String status;
 }

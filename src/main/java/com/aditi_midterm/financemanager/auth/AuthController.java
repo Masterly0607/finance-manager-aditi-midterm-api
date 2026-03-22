@@ -19,9 +19,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
-        String token = authService.register(req); // return access token
-        return new AuthResponse(token);
+    public void register(@Valid @RequestBody RegisterRequest req) {
+        authService.register(req);
     }
 
     /**

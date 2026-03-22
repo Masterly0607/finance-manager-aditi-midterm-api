@@ -60,7 +60,7 @@ public class TransactionDataLoading implements CommandLineRunner {
                 .build();
 
         transactionRepository.saveAll(List.of(
-           t1, t2, t3
+                t1, t2, t3
         ));
     }
 }

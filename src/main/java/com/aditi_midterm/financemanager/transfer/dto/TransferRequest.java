@@ -9,15 +9,13 @@ import java.math.BigDecimal;
 @Data
 public class TransferRequest {
 
-    @NotNull
-    private Long fromAccountId;
+  @NotNull private Long fromAccountId;
 
-    @NotNull
-    private Long toAccountId;
+  @NotNull private Long toAccountId;
 
-    @NotNull
-    @DecimalMin(value = "0.01")
-    private BigDecimal amount;
+  @NotNull
+  @DecimalMin(value = "0.01")
+  private BigDecimal amount;
 
-    private String note;
+  private String note;
 }
